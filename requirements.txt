@@ -1,0 +1,10 @@
+langchain
+langchain_community
+langchain_openai
+langchain_ollama
+pydentic
+dotenv
+boto3
+duckduckgo-search
+ddgs
+prompt_toolkit
