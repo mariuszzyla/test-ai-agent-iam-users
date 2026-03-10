@@ -6,6 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from tools import list_iam_users_with_permissions, get_iam_user_permissions, save_to_file, search_duckduckgo, modify_iam_resource
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.exceptions import OutputParserException
 from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -44,8 +45,8 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    # llm = ChatOpenAI(model="gpt-4o-mini")
-    llm = ChatOllama(model="gpt-oss:latest")
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    # llm = ChatOllama(model="qwen2:1.5b")
 
     chat_prompt = ChatPromptTemplate.from_messages([
         ("system", (
@@ -112,9 +113,13 @@ if __name__ == "__main__":
             config={"configurable": {"session_id": "main"}},
         )
 
-        parsed_output = output_parser.parse(raw_output["output"])
-        print(f"\n--- TOPIC ---\n{parsed_output.topic}")
-        print(f"\n--- SUMMARY ---\n{parsed_output.summary}")
-        print(f"\n--- Affected Users: ---\n{parsed_output.list_of_users}")
+        try:
+            parsed_output = output_parser.parse(raw_output["output"])
+            print(f"\n--- TOPIC ---\n{parsed_output.topic}")
+            print(f"\n--- SUMMARY ---\n{parsed_output.summary}")
+            print(f"\n--- Affected Users: ---\n{parsed_output.list_of_users}")
+        except OutputParserException:
+            # Agent replied with plain text (e.g. greeting), not structured JSON
+            print(f"\n{raw_output['output']}")
 
     print("Thanks!! See you")
